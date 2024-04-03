@@ -80,3 +80,31 @@ let result = add(five, ten);`
 		}
 	}
 }
+
+func TestAgainToken(t *testing.T) {
+	input := `let x = 5;`
+
+	tests := []struct {
+		expectedType    token.TokenType
+		expectedLiteral string
+	}{
+		{token.LET, "let"},
+		{token.IDENT, "x"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+	}
+
+	lexer := New(input)
+	for index, tt := range tests {
+		token := lexer.NextToken()
+
+		if tt.expectedType != token.Type {
+			t.Fatalf("want: %s , have: %s  || %d", tt.expectedType, token.Type, index)
+		}
+
+		if tt.expectedLiteral != token.Literal {
+			t.Fatalf("want: %s , have: %s || %d", tt.expectedLiteral, token.Literal, index)
+		}
+	}
+}

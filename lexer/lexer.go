@@ -62,7 +62,7 @@ func (lexer *Lexer) NextToken() token.Token {
 	case '>':
 		t = newToken(token.GREATERTHAN, lexer.ch)
 	case 0:
-		t = newToken(token.EOF, "")
+		t = newToken(token.EOF, "EOF")
 	default:
 		if isLetter(lexer.ch) {
 			literal := lexer.readIdentifier()
