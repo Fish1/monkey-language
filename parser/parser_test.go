@@ -18,11 +18,18 @@ func TestLetStatements(t *testing.T) {
 	p := New(l)
 
 	program := p.ParseProgram()
+
 	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
+		t.Errorf("ParseProgram() returned nil")
 	}
+
+	if p.HasErrors() {
+		p.PrintErrors()
+		t.Errorf("parsing errors encountered")
+	}
+
 	if len(program.Statements) != 3 {
-		t.Fatalf("Failed to identify three statements")
+		t.Errorf("Failed to identify three statements")
 	}
 
 	tests := []struct{ expectedIdentifier string }{
@@ -37,7 +44,6 @@ func TestLetStatements(t *testing.T) {
 			return
 		}
 	}
-
 }
 
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
@@ -64,4 +70,83 @@ func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	}
 
 	return true
+}
+
+func TestReturnStatements(t *testing.T) {
+	input := `
+	return 123;
+	return x;
+	return mything();
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	if program == nil {
+		t.Errorf("ParseProgram() returned nil")
+	}
+
+	if p.HasErrors() {
+		p.PrintErrors()
+		t.Errorf("parsing errors encountered")
+	}
+
+	if len(program.Statements) != 3 {
+		t.Errorf("failed to identify three statements")
+	}
+
+	for index := range 3 {
+		statement := program.Statements[index]
+		if testReturnStatement(t, statement) == false {
+			return
+		}
+	}
+}
+
+func testReturnStatement(t *testing.T, s ast.Statement) bool {
+	if s.TokenLiteral() != "return" {
+		t.Errorf("token literal not 'return'. got %s", s.TokenLiteral())
+		return false
+	}
+
+	_, ok := s.(*ast.ReturnStatement)
+	if ok == false {
+		t.Errorf("s not *ast.ReturnStatement. got %T", s)
+		return false
+	}
+
+	return true
+}
+
+func TestIdentifierExpression(t *testing.T) {
+	input := "foobar;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	p.PrintErrors()
+
+	if len(program.Statements) != 1 {
+		t.Errorf("program did not identify 1 statements")
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if ok == false {
+		t.Errorf("statement is not an expression statement")
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+	if ok == false {
+		t.Errorf("expression is not an identifier")
+	}
+
+	if ident.Value != "foobar" {
+		t.Errorf("identifier is not foobar")
+	}
+
+	if ident.TokenLiteral() != "foobar" {
+		t.Errorf("ident.TokenLiteral() not %s. got %s", "foobar", ident.TokenLiteral())
+	}
 }
