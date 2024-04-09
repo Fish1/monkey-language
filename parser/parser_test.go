@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/Fish1/monkey-language/ast"
@@ -148,5 +149,68 @@ func TestIdentifierExpression(t *testing.T) {
 
 	if ident.TokenLiteral() != "foobar" {
 		t.Errorf("ident.TokenLiteral() not %s. got %s", "foobar", ident.TokenLiteral())
+	}
+}
+
+func TestIntegerLiteralExpression(t *testing.T) {
+	input := "5;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	p.PrintErrors()
+
+	if len(program.Statements) != 1 {
+		t.Errorf("program did not identify 1 statements")
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if ok == false {
+		t.Errorf("statement is not an expression statement")
+	}
+
+	ident, ok := stmt.Expression.(*ast.IntegerLiteral)
+	if ok == false {
+		t.Errorf("expression is not an integer literal")
+	}
+
+	if ident.Value != 5 {
+		t.Errorf("value is not 5")
+	}
+
+	if ident.TokenLiteral() != "5" {
+		t.Errorf("ident.TokenLiteral() not %s. got %s", "5", ident.TokenLiteral())
+	}
+}
+
+func TestNegationExpression(t *testing.T) {
+	input := "-5;"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	p.PrintErrors()
+
+	if len(program.Statements) != 1 {
+		t.Errorf("program did not identify 1 statements")
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if ok == false {
+		t.Errorf("statement is not an expression statement")
+	}
+
+	negation, ok := stmt.Expression.(*ast.Negation)
+	if ok == false {
+		t.Errorf("expression is not a negation")
+	}
+
+	literal, ok := negation.Expression.(*ast.IntegerLiteral)
+	if ok == false {
+		t.Errorf("negation expression is not an integer literal")
+	}
+
+	if literal.Value != 5 {
+		t.Errorf("literal is not %d. got %d", 5, literal.Value)
 	}
 }

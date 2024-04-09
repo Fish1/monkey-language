@@ -3,6 +3,7 @@ package parser
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/Fish1/monkey-language/ast"
 	"github.com/Fish1/monkey-language/lexer"
@@ -40,6 +41,9 @@ func New(l *lexer.Lexer) *Parser {
 	parser := &Parser{l: l}
 	parser.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	parser.registerPrefix(token.IDENT, parser.parseIdentifier) // when an IDENT is encouterd then parse it
+	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
+	parser.registerPrefix(token.MINUS, parser.parseNegation)
+	// parser.registerPrefix(token.EXCLAMATION, parser.parseOpposite)
 	parser.NextToken()
 	parser.NextToken()
 	return parser
@@ -158,12 +162,28 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	if prefix == nil {
 		return nil
 	}
-	leftExpression := prefix()
-	return leftExpression
+	return prefix()
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{Token: p.currToken, Value: p.currToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+	value, err := strconv.ParseInt(p.currToken.Literal, 0, 64)
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %s as integer", p.currToken.Literal)
+		p.Errors = append(p.Errors, msg)
+		return nil
+	}
+	return &ast.IntegerLiteral{Token: p.currToken, Value: value}
+}
+
+func (p *Parser) parseNegation() ast.Expression {
+	expression := &ast.Negation{Token: p.currToken}
+	p.NextToken()
+	expression.Expression = p.parseExpression(LOWEST)
+	return expression
 }
 
 func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {

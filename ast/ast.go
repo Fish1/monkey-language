@@ -101,3 +101,25 @@ func (es *ExpressionStatement) String() string {
 	}
 	return ""
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode()      {}
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string {
+	return il.TokenLiteral()
+}
+
+type Negation struct {
+	Token      token.Token
+	Expression Expression
+}
+
+func (il *Negation) expressionNode()      {}
+func (il *Negation) TokenLiteral() string { return il.Token.Literal }
+func (il *Negation) String() string {
+	return il.TokenLiteral() + il.Expression.String()
+}
