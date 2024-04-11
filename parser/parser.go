@@ -42,8 +42,8 @@ func New(l *lexer.Lexer) *Parser {
 	parser.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	parser.registerPrefix(token.IDENT, parser.parseIdentifier) // when an IDENT is encouterd then parse it
 	parser.registerPrefix(token.INT, parser.parseIntegerLiteral)
-	parser.registerPrefix(token.MINUS, parser.parseNegation)
-	// parser.registerPrefix(token.EXCLAMATION, parser.parseOpposite)
+	parser.registerPrefix(token.MINUS, parser.parsePrefixExpression)
+	parser.registerPrefix(token.EXCLAMATION, parser.parsePrefixExpression)
 	parser.NextToken()
 	parser.NextToken()
 	return parser
@@ -179,10 +179,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	return &ast.IntegerLiteral{Token: p.currToken, Value: value}
 }
 
-func (p *Parser) parseNegation() ast.Expression {
-	expression := &ast.Negation{Token: p.currToken}
+func (p *Parser) parsePrefixExpression() ast.Expression {
+	expression := &ast.PrefixExpression{Token: p.currToken, Operator: p.currToken.Literal}
 	p.NextToken()
-	expression.Expression = p.parseExpression(LOWEST)
+	expression.Right = p.parseExpression(PREFIX)
 	return expression
 }
 

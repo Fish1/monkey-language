@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Fish1/monkey-language/ast"
@@ -183,16 +182,16 @@ func TestIntegerLiteralExpression(t *testing.T) {
 	}
 }
 
-func TestNegationExpression(t *testing.T) {
-	input := "-5;"
+func TestPrefixExpression(t *testing.T) {
+	input := "-5;!6;"
 
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
 	p.PrintErrors()
 
-	if len(program.Statements) != 1 {
-		t.Errorf("program did not identify 1 statements")
+	if len(program.Statements) != 2 {
+		t.Errorf("program did not identify 2 statements")
 	}
 
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
@@ -200,17 +199,36 @@ func TestNegationExpression(t *testing.T) {
 		t.Errorf("statement is not an expression statement")
 	}
 
-	negation, ok := stmt.Expression.(*ast.Negation)
+	negation, ok := stmt.Expression.(*ast.PrefixExpression)
 	if ok == false {
-		t.Errorf("expression is not a negation")
+		t.Errorf("expression is not a prefix expression")
 	}
 
-	literal, ok := negation.Expression.(*ast.IntegerLiteral)
+	literal, ok := negation.Right.(*ast.IntegerLiteral)
 	if ok == false {
 		t.Errorf("negation expression is not an integer literal")
 	}
 
 	if literal.Value != 5 {
 		t.Errorf("literal is not %d. got %d", 5, literal.Value)
+	}
+
+	stmt, ok = program.Statements[1].(*ast.ExpressionStatement)
+	if ok == false {
+		t.Errorf("statement is not an expression statement")
+	}
+
+	exclamation, ok := stmt.Expression.(*ast.PrefixExpression)
+	if ok == false {
+		t.Errorf("expression is not a prefix expression")
+	}
+
+	literal, ok = exclamation.Right.(*ast.IntegerLiteral)
+	if ok == false {
+		t.Errorf("negation expression is not an integer literal")
+	}
+
+	if literal.Value != 6 {
+		t.Errorf("literal is not %d. got %d", 6, literal.Value)
 	}
 }

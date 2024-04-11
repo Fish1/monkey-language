@@ -113,13 +113,14 @@ func (il *IntegerLiteral) String() string {
 	return il.TokenLiteral()
 }
 
-type Negation struct {
-	Token      token.Token
-	Expression Expression
+type PrefixExpression struct {
+	Token    token.Token
+	Operator string
+	Right    Expression
 }
 
-func (il *Negation) expressionNode()      {}
-func (il *Negation) TokenLiteral() string { return il.Token.Literal }
-func (il *Negation) String() string {
-	return il.TokenLiteral() + il.Expression.String()
+func (il *PrefixExpression) expressionNode()      {}
+func (il *PrefixExpression) TokenLiteral() string { return il.Token.Literal }
+func (il *PrefixExpression) String() string {
+	return il.TokenLiteral() + il.Right.String()
 }
